@@ -2,32 +2,37 @@ import requests
 import os
 from bs4 import BeautifulSoup
 import time
+import csv
 """
-WHOI file name structure: 
+WMMDS web page structure:
+    All sound cut page (dropdown)
+        Species recording page (by year of recording)
+            recording audio download links
+    
+
+WHOI recording file name structure: 
     AABBBCCC
     AA: 2 digit number (base 10) corresponding to year of recording
     BBB: 3-digit number (base 10) corresponding to species identification code
     CCC: 3-digit number (base 26) corresponding to id of recording (starting from 1)
 """
-def download_file(url, save_path):
+def downloadFile(url, saveDir):
     """
     Downloads a given url file to a save path
     """
     try:
         response = requests.get(url, stream=True)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
-
-        with open(save_path, 'wb') as file:
+        filename = os.path.basename(url)
+        savePath = os.path.join(saveDir, filename)
+        with open(savePath, 'wb') as file:
             for chunk in response.iter_content(chunk_size=8192):
                 file.write(chunk)
-        print(f"Downloaded '{url}' to '{save_path}'")
+        print(f"Downloaded '{url}' to '{savePath}'")
     except requests.exceptions.RequestException as e:
         print(f"Error downloading '{url}': {e}")
 
-#url = "https://cis.whoi.edu/science/B/whalesounds/WhaleSounds/61025001.wav"
-#filename = os.path.basename(url)  # Extracts filename from URL
-#save_path = os.path.join(os.getcwd(), filename) # Saves in current directory
-#download_file(url, save_path)
+
 
 def getSpeciesURLs(baseURL: str)->list[str]:
     """
@@ -49,7 +54,6 @@ def getSpeciesURLs(baseURL: str)->list[str]:
         recordingURLs.append(recordingURL)
     return recordingURLs
 
-#getSpeciesURLs("https://cis.whoi.edu/science/B/whalesounds/fullCuts.cfm?SP=BD15F&YR=-1")    
 
 def getSoundURLsFromURL(url: str)->list[str]:
     """
@@ -70,6 +74,46 @@ def getSoundURLsFromURL(url: str)->list[str]:
         urlList.append(baseAddress + entry['href'])
     return urlList
 
-def downloadAllFromSpecies(baseURL)
+def downloadAllFromSpecies(baseURL: str, savePath: str, timedelay: int = 2)->None:
+    """
+    Given a base URL for a species, download all sound files from that species to the designated path directory 
+    (relative to the working directory). Impose a time delay to prevent throttling or a site crash
+    """
+    recordingURLs = getSpeciesURLs(baseURL)
+    downloadURLs = []
+    for url in recordingURLs:
+        downloadURLs.extend(getSoundURLsFromURL(url))
+    for fileURL in downloadURLs:
+        downloadFile(fileURL, savePath)
+        time.sleep(timedelay)
 
-#https://cis.whoi.edu/science/B/whalesounds/fullCuts.cfm?SP=CC3A&YR=63
+def downloadDataset(saveDir: str)->None:
+    """
+    Download the entire Watkins Marine Mammal Dataset
+    """
+    with open("WMMDSmetadata.csv") as file:
+        metadata = csv.reader(file)
+        next(metadata) #skip header
+        urlHeader = "https://cis.whoi.edu/science/B/whalesounds/"
+        for species in metadata:
+            baseURL = urlHeader + species[1]
+            speciesName = species[2][1:-1] #strip quotes from csv
+            isDownloaded = (species[3] == "TRUE")
+            if isDownloaded: #skip downloading files that have already been downloaded
+                continue
+            speciesSaveDir = os.path.join(saveDir, speciesName)
+            if not os.path.exists(speciesSaveDir): #create save directory if it does not exist
+                os.mkdir(speciesSaveDir)
+            downloadAllFromSpecies(baseURL, speciesSaveDir)
+
+if __name__ == "__main__":
+    #baseURL = "https://cis.whoi.edu/science/B/whalesounds/fullCuts.cfm?SP=CC3A&YR=-1"
+    #saveDir = os.path.join(os.getcwd(), "RawSoundData")
+    #downloadAllFromSpecies(baseURL, saveDir)
+    #https://cis.whoi.edu/science/B/whalesounds/fullCuts.cfm?SP=CC3A&YR=63
+    #getSpeciesURLs("https://cis.whoi.edu/science/B/whalesounds/fullCuts.cfm?SP=BD15F&YR=-1")    
+    #url = "https://cis.whoi.edu/science/B/whalesounds/WhaleSounds/61025001.wav"
+    #filename = os.path.basename(url)  # Extracts filename from URL
+    #save_path = os.path.join(os.getcwd(), filename) # Saves in current directory
+    #download_file(url, save_path)
+    downloadDataset("RawSoundData")
