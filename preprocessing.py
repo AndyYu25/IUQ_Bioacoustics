@@ -85,13 +85,12 @@ def preprocessAudio(audioDir: str, outputDir: str, csvpath : str,
             fileName = os.path.splitext(file)[0]
             fileLabelPair.append([fileName, subfolder])
             audioPath = os.path.join(audioDir, subfolder, file)
-            print(audioPath)
             #initialize the output file path
             outFileName = fileName + ".pt"
             outFilePath = os.path.join(outSubdir, outFileName)
-            print(outFilePath)
             outSpectrogram = preprocessFile(audioPath, melSpec, resampleRate, numTimestamps)
             save(outSpectrogram, outFilePath)
+        print(f"{subfolder} done!")
     #save label csv
     with open(csvpath, "w") as file:
         csvWriter = csv.writer(file)
@@ -103,4 +102,4 @@ if __name__ == "__main__":
     #melspecConversion = MelSpectrogram(n_mels = 64, hop_length = 200, normalized = True)
     #path = os.path.join(os.getcwd(), "RawSoundData\\Atlantic Spotted Dolphin\\6102500D.wav")
     #preprocessFile(path, melspecConversion)
-    preprocessAudio("testDir", "testOutDir", "labels.csv")
+    preprocessAudio("RawSoundData", "preprocessed", "labels.csv")
