@@ -13,3 +13,14 @@ Activate the environment, then follow [these instructions](https://pytorch.org/g
 conda activate bioacoustics
 pip3 install torch torchvision torchaudio
 ```
+
+## Downloading Processed Data
+
+Download data from [here](https://drive.google.com/file/d/1WUgfFip5xvxQV-RqWRaHCRYuCwqBCGL7/view). Optionally, use `gdown` to download directly using the file ID. Place the data in a `data` directory then unzip.
+
+```console
+pip3 install gdown
+mkdir data && cd data
+gdown 1WUgfFip5xvxQV-RqWRaHCRYuCwqBCGL7
+unzip preprocessed.zip
+```
