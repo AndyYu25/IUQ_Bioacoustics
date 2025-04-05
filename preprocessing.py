@@ -60,8 +60,8 @@ def preprocessFile(loadPath: str, melSpec: MelSpectrogram, resampleRate: int = 4
     return melSpecOut
 
 def preprocessAudio(audioDir: str, outputDir: str, csvpath : str,
-                    n_mels:int = 256, hop_length:int = 16, normalized:bool = True,
-                    resampleRate:int = 47600, numTimestamps:int = 8191)->None:
+                    n_mels:int = 41, hop_length:int = 126, normalized:bool = True,
+                    resampleRate:int = 47600, numTimestamps:int = 8000)->None:
     """
     Preprocess all sound files from audioDir and output them into outputDir as pytorch Tensors. 
     Also aggregate each file's corresponding label (represented by the subfolder) into a csv,
@@ -107,4 +107,4 @@ if __name__ == "__main__":
     #melspecConversion = MelSpectrogram(n_mels = 64, hop_length = 200, normalized = True)
     #path = os.path.join(os.getcwd(), "RawSoundData\\Atlantic Spotted Dolphin\\6102500D.wav")
     #preprocessFile(path, melspecConversion)
-    preprocessAudio("RawSoundData", "preprocessed", "labels.csv")
+    preprocessAudio("RawSoundData", "preprocessed_small", "labels.csv")
