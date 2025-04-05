@@ -1,6 +1,9 @@
 *.wav
 *.pt
 preprocessed.zip
+temp*
+data/
+checkpoints/
 
 
 # Byte-compiled / optimized / DLL files
