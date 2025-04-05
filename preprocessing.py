@@ -2,7 +2,7 @@ import torchaudio
 from torchaudio.functional import resample
 from torchaudio.transforms import MelSpectrogram
 from torch.nn.functional import pad
-from torch import save, Tensor
+from torch import save, Tensor, mean, std
 import os
 import csv
 """
@@ -12,6 +12,7 @@ Liccardi & Carbone 2024: https://arxiv.org/html/2402.17775v2 - Mel Spectrograms 
 2. Align + Center time series to 8000 timestamps
     a. zero-pad shorter time series
     b. retain only central points
+3. Standardization - ensure zero mean and unit variance in each timestamp
 3. Calculate Mel Spectrogram
     a. Frequency fixed at 64
     b. hop-length set to 200
@@ -54,13 +55,14 @@ def preprocessFile(loadPath: str, melSpec: MelSpectrogram, resampleRate: int = 4
     waveform = resample(waveform, sampleRate, resampleRate)
     #alignment & cropping
     waveform = alignAudio(waveform, numTimestamps)
+    #standardization:
+    waveform = (waveform - mean(waveform))/std(waveform)
     #conversion to mel spectrogram
     melSpecOut = melSpec.forward(waveform)
-    #print(melSpecOut.shape)
     return melSpecOut
 
 def preprocessAudio(audioDir: str, outputDir: str, csvpath : str,
-                    n_mels:int = 41, hop_length:int = 126, normalized:bool = True,
+                    n_mels:int = 64, hop_length:int = 200, normalized:bool = True,
                     resampleRate:int = 47600, numTimestamps:int = 8000)->None:
     """
     Preprocess all sound files from audioDir and output them into outputDir as pytorch Tensors. 
@@ -76,6 +78,7 @@ def preprocessAudio(audioDir: str, outputDir: str, csvpath : str,
     assert(os.path.exists(audioDir)) #check that that input dir exists
     if not os.path.exists(outputDir): # create output directory if none exists
         os.mkdir(outputDir)
+    print(f"Output Spectrogram Dimensions: 1x{n_mels}x{int(numTimestamps / hop_length) + 1}")
     fileLabelPair = [["fileName", "audioDir"]]
     #instantiate melspectrogram
     melSpec= MelSpectrogram(n_mels = n_mels, hop_length = hop_length, normalized = normalized)
@@ -107,4 +110,4 @@ if __name__ == "__main__":
     #melspecConversion = MelSpectrogram(n_mels = 64, hop_length = 200, normalized = True)
     #path = os.path.join(os.getcwd(), "RawSoundData\\Atlantic Spotted Dolphin\\6102500D.wav")
     #preprocessFile(path, melspecConversion)
-    preprocessAudio("RawSoundData", "preprocessed_small", "labels.csv")
+    preprocessAudio("RawSoundData", "preprocessed", "labels.csv")
