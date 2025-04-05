@@ -56,17 +56,22 @@ def preprocessFile(loadPath: str, melSpec: MelSpectrogram, resampleRate: int = 4
     waveform = alignAudio(waveform, numTimestamps)
     #conversion to mel spectrogram
     melSpecOut = melSpec.forward(waveform)
+    #print(melSpecOut.shape)
     return melSpecOut
 
 def preprocessAudio(audioDir: str, outputDir: str, csvpath : str,
-                    n_mels:int = 64, hop_length:int = 200, normalized:bool = True,
-                    resampleRate:int = 47600, numTimestamps:int = 8000)->None:
+                    n_mels:int = 256, hop_length:int = 16, normalized:bool = True,
+                    resampleRate:int = 47600, numTimestamps:int = 8191)->None:
     """
     Preprocess all sound files from audioDir and output them into outputDir as pytorch Tensors. 
     Also aggregate each file's corresponding label (represented by the subfolder) into a csv,
     Assumes one layer of subfolders exists (as generated from dataCollection.downloadDataset)
     n_mels, hop_length, and normalized correspond to the mel spectrogram parameters,
     resampleRate and numTimestamps affects the resampled rate and the number of timestampes respectively.
+
+    Base: n_mels = 64, numTimestamps=8000, hop_length = 200 -> 41x64 spectrogram
+    Base: n_mels = 41, numTimestamps=8000, hop_length = 126 -> 64x41 spectrogram
+    Upscaled: n_mels = 256, numTimestamps=8191, hop_length = 16 -> 512x256 spectrogram
     """
     assert(os.path.exists(audioDir)) #check that that input dir exists
     if not os.path.exists(outputDir): # create output directory if none exists
