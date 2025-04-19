@@ -238,6 +238,122 @@ def evaluate_ensemble(base_model, state_dict_files, data_loader, device):
     
     return metrics
 
+def evaluate_dropout(base_model, data_loader, num_passes, device):
+    """
+    Evaluate Monte-Carlo Dropout on the given data loader
+    
+    Args:
+        base_model: PyTorch model architecture, with dropout (will be used as template)
+        data_loader: DataLoader for evaluation data (works with shuffle=True)
+        num_passes: the number of stochastic forward passes to perform
+        device: device to run inference on
+    
+    Returns:
+        metrics: dictionary of evaluation metrics
+    """
+    # For timing
+    start_time = time.time()
+    
+    # Move model to device once
+    base_model.to(device)
+    
+    # Store all data in memory first
+    all_inputs = []
+    all_targets = []
+    
+    # Collect all inputs and targets
+    for inputs, targets in data_loader:
+        all_inputs.append(inputs)
+        all_targets.append(targets)
+    
+    # Concatenate targets
+    all_targets = torch.cat(all_targets).cpu().numpy()
+    
+    # Initialize array to hold ensemble predictions
+    ensemble_probs = []
+
+    # Set model to evaluation mode; keep dropout layer active
+    base_model.eval()
+    for m in base_model.modules():
+      if m.__class__.__name__.startswith('Dropout'):
+        m.train()
+    
+    # Run inference with each model in the ensemble
+    for i in range(num_passes):   
+        
+        model_probs = []
+        
+        with torch.no_grad():
+            # Process each batch with current model
+            for inputs in all_inputs:
+                inputs = inputs.to(device)
+                
+                # Forward pass
+                outputs = base_model(inputs)
+                
+                # Get probabilities
+                probs = torch.nn.functional.softmax(outputs, dim=1)
+                model_probs.append(probs.cpu().numpy())
+        
+        # Concatenate all probability arrays for this model
+        model_probs = np.vstack(model_probs)
+        ensemble_probs.append(model_probs)
+    
+    # Stack all model probabilities (shape: [n_models, n_samples, n_classes])
+    ensemble_probs = np.stack(ensemble_probs)
+    
+    # Calculate mean probabilities across ensemble (shape: [n_samples, n_classes])
+    mean_probs = np.mean(ensemble_probs, axis=0)
+    
+    # Calculate ensemble predictions from mean probabilities
+    ensemble_preds = np.argmax(mean_probs, axis=1)
+    
+    # Calculate inference time
+    inference_time = time.time() - start_time
+    
+    # Calculate metrics
+    accuracy = accuracy_score(all_targets, ensemble_preds)
+    precision, recall, f1, _ = precision_recall_fscore_support(all_targets, ensemble_preds, average='weighted', zero_division=0)
+    
+    # Calculate ECE using mean probabilities
+    ece, bin_accs, bin_confs, bin_counts = compute_ece(mean_probs, all_targets)
+    
+    # Calculate predictive entropy from mean probabilities
+    pred_entropies = -np.sum(mean_probs * np.log(np.clip(mean_probs, 1e-10, 1.0)), axis=1)
+    mean_pred_entropy = np.mean(pred_entropies)
+    
+    # Calculate mutual information (epistemic uncertainty)
+    # First, calculate entropy of each model's prediction
+    model_entropies = -np.sum(ensemble_probs * np.log(np.clip(ensemble_probs, 1e-10, 1.0)), axis=2)
+    # Average these entropies
+    avg_model_entropy = np.mean(model_entropies, axis=0)
+    # Mutual information = Predictive entropy - Average model entropy
+    mutual_info = pred_entropies - avg_model_entropy
+    mean_mutual_info = np.mean(mutual_info)
+    
+    # Calculate variance of probabilities across models (another measure of epistemic uncertainty)
+    prob_variance = np.mean(np.var(ensemble_probs, axis=0), axis=1)
+    mean_prob_variance = np.mean(prob_variance)
+    
+    metrics = {
+        'accuracy': accuracy,
+        'precision': precision,
+        'recall': recall,
+        'f1': f1,
+        'ece': ece,
+        'mean_predictive_entropy': mean_pred_entropy,
+        'mean_mutual_information': mean_mutual_info,  # epistemic uncertainty
+        'mean_prob_variance': mean_prob_variance,     # another measure of epistemic uncertainty
+        'inference_time': inference_time,
+        'inference_time_per_sample': inference_time / len(all_targets),
+        'bin_accuracies': bin_accs,
+        'bin_confidences': bin_confs,
+        'bin_counts': bin_counts
+    }
+    
+    return metrics
+
+
 def plot_calibration_curve(bin_accuracies, bin_confidences, bin_counts, title='Calibration Curve'):
     """
     Plot calibration curve
