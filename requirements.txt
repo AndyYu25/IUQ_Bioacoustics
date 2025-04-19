@@ -1,5 +1,13 @@
 requests
 beautifulsoup4
-pytorch
+torch
 torchvision
 torchaudio
+ipykernel
+tqdm
+numpy
+matplotlib 
+seaborn 
+pandas 
+scikit-learn 
+scipy

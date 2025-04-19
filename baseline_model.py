@@ -44,7 +44,7 @@ class InceptionBlock(nn.Module):
 
 
 class MarineMammalInceptionNet(nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, dropoutProbs=0.5):
         super(MarineMammalInceptionNet, self).__init__()
         
         # Initial convolution layers
@@ -76,6 +76,7 @@ class MarineMammalInceptionNet(nn.Module):
         
         # Fully connected layers
         self.fc1 = nn.Linear(352, 256)
+        self.dropout = nn.Dropout(dropoutProbs)
         self.fc2 = nn.Linear(256, num_classes)
         
     def forward(self, x):
@@ -95,8 +96,11 @@ class MarineMammalInceptionNet(nn.Module):
         x = self.avg_pool(x)
         x = torch.flatten(x, 1)
         
-        # Fully connected layers
+        
+        # Fully connected layers, w/ dropout
+        x = self.dropout(x)
         x = F.relu(self.fc1(x))
+        x = self.dropout(x)
         x = self.fc2(x)
         
         return x
