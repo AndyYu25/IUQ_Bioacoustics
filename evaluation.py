@@ -272,15 +272,15 @@ def evaluate_dropout(base_model, data_loader, num_passes, device):
     # Initialize array to hold ensemble predictions
     ensemble_probs = []
 
-    # Set model to evaluation mode; keep dropout layer active
-    base_model.eval()
-    for m in base_model.modules():
-      if m.__class__.__name__.startswith('Dropout'):
-        m.train()
     
     # Run inference with each model in the ensemble
     for i in range(num_passes):   
-        
+        # Reset dropout layer each time by reinitializing evaluation mode
+        # and reenabling dropout 
+        base_model.eval()
+        for m in base_model.modules():
+            if m.__class__.__name__.startswith('Dropout'):
+                m.train()
         model_probs = []
         
         with torch.no_grad():

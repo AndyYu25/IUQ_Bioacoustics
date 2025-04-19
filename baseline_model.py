@@ -44,7 +44,7 @@ class InceptionBlock(nn.Module):
 
 
 class MarineMammalInceptionNet(nn.Module):
-    def __init__(self, num_classes, dropoutProbs=0.5):
+    def __init__(self, num_classes, dropoutProbs=0.2):
         super(MarineMammalInceptionNet, self).__init__()
         
         # Initial convolution layers
