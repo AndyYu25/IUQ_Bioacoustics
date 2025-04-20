@@ -11,3 +11,4 @@ seaborn
 pandas 
 scikit-learn 
 scipy
+blitz-bayesian-pytorch

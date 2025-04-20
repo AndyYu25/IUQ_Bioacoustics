@@ -96,7 +96,6 @@ class MarineMammalInceptionNet(nn.Module):
         x = self.avg_pool(x)
         x = torch.flatten(x, 1)
         
-        
         # Fully connected layers, w/ dropout
         x = self.dropout(x)
         x = F.relu(self.fc1(x))
@@ -104,3 +103,52 @@ class MarineMammalInceptionNet(nn.Module):
         x = self.fc2(x)
         
         return x
+
+
+# === BAYESIAN VERSION (Add-on only, baseline untouched) ===
+
+from blitz.modules import BayesianLinear
+from blitz.utils import variational_estimator
+
+@variational_estimator
+class MarineMammalBNN(nn.Module):
+    def __init__(self, num_classes, dropoutProbs=0.2):
+        super(MarineMammalBNN, self).__init__()
+
+        # Same structure as baseline
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
+        self.bn1 = nn.BatchNorm2d(32)
+        self.pool1 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(64)
+        self.pool2 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+        self.inception3a = InceptionBlock(64, 64, 48, 64, 16, 32, 32)
+        self.inception3b = InceptionBlock(192, 128, 64, 96, 32, 64, 64)
+        self.pool3 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+        self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
+
+        self.fc1 = nn.Linear(352, 256)
+        self.dropout = nn.Dropout(dropoutProbs)
+        self.bayes_fc2 = BayesianLinear(256, num_classes)
+
+    def forward(self, x):
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = self.pool1(x)
+
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = self.pool2(x)
+
+        x = self.inception3a(x)
+        x = self.inception3b(x)
+        x = self.pool3(x)
+
+        x = self.avg_pool(x)
+        x = torch.flatten(x, 1)
+
+        x = self.dropout(x)
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)
+        return self.bayes_fc2(x)
