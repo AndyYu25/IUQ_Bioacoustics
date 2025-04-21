@@ -182,3 +182,4 @@ cython_debug/
 .pypirc
 preprocessed_large.zip
 test.csv
+*.pth

@@ -72,7 +72,7 @@ def preprocessAudio(audioDir: str, outputDir: str, csvpath : str,
     resampleRate and numTimestamps affects the resampled rate and the number of timestampes respectively.
 
     Base: n_mels = 64, numTimestamps=8000, hop_length = 200 -> 64x41 spectrogram
-    Base: n_mels = 41, numTimestamps=8000, hop_length = 126 -> 4164 spectrogram
+    Base: n_mels = 41, numTimestamps=8000, hop_length = 126 -> 41x64 spectrogram
     Upscaled: n_mels = 256, numTimestamps=8191, hop_length = 16 -> 512x256 spectrogram
     """
     assert(os.path.exists(audioDir)) #check that that input dir exists
