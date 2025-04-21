@@ -68,8 +68,8 @@ def visualizeSpectrogramDir(directory: str, numFiles: int = 36):
     cbar_ax = fig.add_axes([0.88, 0.15, 0.02, 0.7])
     fig.colorbar(im, cax=cbar_ax, label='Amplitude')
 
-    plt.suptitle(f'Batch of 36 Mel-Spectrograms', fontsize=14)
-    plt.tight_layout(rect=[0, 0, 0.85, 0.95])
+    plt.suptitle(f'Gray Whale Preprocessed Mel-Spectrograms', fontsize=14)
+    #plt.tight_layout(rect=[0, 0, 0.85, 0.95])
     plt.show()
 
 if __name__ == "__main__":

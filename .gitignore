@@ -1,5 +1,4 @@
 *.wav
-*.pt
 preprocessed.zip
 temp*
 data/
