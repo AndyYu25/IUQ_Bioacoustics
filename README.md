@@ -28,7 +28,7 @@ CSE8803-IUQ (Introduction to Uncertainty Quantification) term project on perform
 
 All four notebooks comprising of the baseline model (baseline.ipynb), Monte Carlo dropout (mcdropout.ipynb), deep ensemble (ensemble.ipynb), and the Bayesian neural network (bayesian_bnn.ipynb) 
 can be directly uploaded to Google Colab and run directly from there to replicate results. 
-The requisite package, other repository files, and pre-processed data will be downlaoded using the 1st 3 cells of each notebook. A GPU is highly suggested due to the cost of the training process.
+The requisite package, other repository files, and pre-processed data will be downlaoded using the 1st 3 cells of each notebook. A GPU and 16+ GB of RAM is highly suggested due to the cost of the training process.
 
 A demonstration of how to run baseline.ipynb can be found in the linked video below:
 
