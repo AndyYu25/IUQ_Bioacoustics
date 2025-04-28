@@ -30,6 +30,12 @@ All four notebooks comprising of the baseline model (baseline.ipynb), Monte Carl
 can be directly uploaded to Google Colab and run directly from there to replicate results. 
 The requisite package, other repository files, and pre-processed data will be downlaoded using the 1st 3 cells of each notebook. A GPU is highly suggested due to the cost of the training process.
 
+A demonstration of how to run baseline.ipynb can be found in the linked video below:
+
+[![IUQ Demo](https://img.youtube.com/vi/HCTpn3RrKMs/0.jpg)](https://www.youtube.com/watch?v=HCTpn3RrKMs "IUQ Demo")
+
+
+
 ## Installation (Other)
 
 After cloning the repository, run `pip install -r requirements.txt` to install all requisite libraries. Again, a GPU is highly suggested due to the cost of the training process.
