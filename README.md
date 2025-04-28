@@ -3,25 +3,25 @@ CSE8803-IUQ (Introduction to Uncertainty Quantification) term project on perform
 
 ## Code File Breakdown
 
-dataset/dataCollection.py is the script to scrape the entirety of the Watkins Marine Mammal Database.
+**dataset/dataCollection.py** is the script to scrape the entirety of the Watkins Marine Mammal Database.
 
-dataset/preprocessing.py is the script to convert the downloaded sound files into the preprocessed mel-spectrograms (stored as tensors)
+**dataset/preprocessing.py** is the script to convert the downloaded sound files into the preprocessed mel-spectrograms (stored as tensors)
 
-dataset/dataVisualizer.py is a script to visualize mel-spectrograms from the generated tensors.
+**dataset/dataVisualizer.py** is a script to visualize mel-spectrograms from the generated tensors.
 
-baseline_model.py contains the model architecture for the InceptionNet baseline as well as the modified Bayesian Neural Network
+**baseline_model.py** contains the model architecture for the InceptionNet baseline as well as the modified Bayesian Neural Network
 
-dataset.py contains the PyTorch dataset generator for all models.
+**dataset.py** contains the PyTorch dataset generator for all models.
 
-evaluation.py contains the code for evaluating the baseline, deep ensemble, and MC dropout approaches (BNN evaluation implemented within notebook)
+**evaluation.py** contains the code for evaluating the baseline, deep ensemble, and MC dropout approaches (BNN evaluation implemented within notebook)
 
-baseline.ipynb contains the code to train and evaluate the base InceptionNet model, without any UQ methods applied.
+**baseline.ipynb** contains the code to train and evaluate the base InceptionNet model, without any UQ methods applied.
 
-bayesian_bnn.ipynb contains the code to train and evaluate the Bayesian Neural Network.
+**bayesian_bnn.ipynb** contains the code to train and evaluate the Bayesian Neural Network.
 
-ensemble.ipynb contains the code to train and evaluate the deep ensemble.
+**ensemble.ipynb** contains the code to train and evaluate the deep ensemble.
 
-mcdropout.ipynb contains the code to train and evaluate the Monte Carlo dropout model.
+**mcdropout.ipynb** contains the code to train and evaluate the Monte Carlo dropout model.
 
 
 ## Intallation & Execution (Google Colab)
